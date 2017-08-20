@@ -139,7 +139,7 @@ ifThenElse :: Column T.PGBool -> Column a -> Column a -> Column a
 ifThenElse = unsafeIfThenElse
 
 -- | Polymorphic if\/then\/else.
-ifThenElseMany :: D.Default O.IfPP columns columns
+ifThenElseMany :: D.Default O.EqPP columns columns
                => Column T.PGBool
                -> columns
                -> columns

@@ -1,7 +1,9 @@
 module Opaleye.Internal.PGTypes where
 
 import           Opaleye.Internal.Column (Column(Column))
+import qualified Opaleye.Internal.Column as C
 import qualified Opaleye.Internal.HaskellDB.PrimQuery as HPQ
+import qualified Opaleye.SqlType                      as SqlType
 
 import qualified Data.Text as SText
 import qualified Data.Text.Encoding as STextEncoding
@@ -21,7 +23,10 @@ literalColumn = Column . HPQ.ConstExpr
 
 castToType :: HPQ.Name -> String -> Column c
 castToType typeName =
-    Column . HPQ.CastExpr typeName . HPQ.ConstExpr . HPQ.OtherLit
+    Column
+    . HPQ.CastExpr (SqlType.SqlBaseType typeName)
+    . HPQ.ConstExpr
+    . HPQ.OtherLit
 
 strictDecodeUtf8 :: SByteString.ByteString -> String
 strictDecodeUtf8 = SText.unpack . STextEncoding.decodeUtf8

@@ -23,6 +23,7 @@ import Opaleye.Internal.HaskellDB.Sql (SqlColumn(..), SqlDelete(..),
                                SqlExpr(..), SqlOrder(..), SqlInsert(..),
                                SqlUpdate(..), SqlTable(..), SqlRangeBound(..))
 import qualified Opaleye.Internal.HaskellDB.Sql as Sql
+import qualified Opaleye.SqlType                as SqlType
 
 import Data.List (intersperse)
 import qualified Data.List.NonEmpty as NEL
@@ -162,7 +163,7 @@ ppSqlExpr expr =
       ListSqlExpr es         -> parens (commaH ppSqlExpr (NEL.toList es))
       ParamSqlExpr _ v       -> ppSqlExpr v
       PlaceHolderSqlExpr     -> text "?"
-      CastSqlExpr typ e      -> text "CAST" <> parens (ppSqlExpr e <+> text "AS" <+> text typ)
+      CastSqlExpr typ e      -> text "CAST" <> parens (ppSqlExpr e <+> text "AS" <+> ppSqlType typ)
       DefaultSqlExpr         -> text "DEFAULT"
       ArraySqlExpr es        -> text "ARRAY" <> brackets (commaH ppSqlExpr es)
       RangeSqlExpr t s e     -> ppRange t s e
@@ -171,6 +172,10 @@ ppSqlExpr expr =
                              <+> text "ELSE" <+> ppSqlExpr el <+> text "END"
           where ppWhen (w,t) = text "WHEN" <+> ppSqlExpr w
                                <+> text "THEN" <+> ppSqlExpr t
+
+ppSqlType :: SqlType.SqlType -> Doc
+ppSqlType (SqlType.SqlBaseType typename) = doubleQuotes (text typename)
+ppSqlType (SqlType.SqlArray type_) = ppSqlType type_ <> text "[]"
 
 commaH :: (a -> Doc) -> [a] -> Doc
 commaH f = hcat . punctuate comma . map f

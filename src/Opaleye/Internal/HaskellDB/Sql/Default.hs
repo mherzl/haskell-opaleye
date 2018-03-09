@@ -223,7 +223,6 @@ showAggrOp AggrArr            = "ARRAY_AGG"
 showAggrOp (AggrStringAggr _) = "STRING_AGG"
 showAggrOp (AggrOther s)      = s
 
-
 defaultSqlLiteral :: SqlGenerator -> Literal -> String
 defaultSqlLiteral _ l =
     case l of

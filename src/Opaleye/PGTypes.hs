@@ -12,6 +12,7 @@ import qualified Opaleye.Internal.PGTypes as IPT
 
 import qualified Opaleye.Internal.HaskellDB.PrimQuery as HPQ
 import qualified Opaleye.Internal.HaskellDB.Sql.Default as HSD
+import qualified Opaleye.SqlType                        as SqlType
 
 import qualified Data.CaseInsensitive as CI
 import qualified Data.Aeson as Ae
@@ -139,7 +140,7 @@ pgValueJSONB :: Ae.ToJSON a => a -> Column PGJsonb
 pgValueJSONB = pgLazyJSONB . Ae.encode
 
 pgArray :: forall a b. IsSqlType b => (a -> C.Column b) -> [a] -> C.Column (PGArray b)
-pgArray pgEl xs = C.unsafeCast arrayTy $
+pgArray pgEl xs = C.unsafeCastType arrayTy $
   C.Column (HPQ.ArrayExpr (map oneEl xs))
   where
     oneEl = C.unColumn . pgEl
@@ -153,69 +154,69 @@ pgRange pgEl start end = C.Column (HPQ.RangeExpr (showRangeType ([] :: [b])) (on
         oneEl R.PosInfinity   = HPQ.PosInfinity
 
 class IsSqlType sqlType where
-  showSqlType :: proxy sqlType -> String
+  showSqlType :: proxy sqlType -> SqlType.SqlType
 
 instance IsSqlType PGBool where
-  showSqlType _ = "boolean"
+  showSqlType _ = SqlType.SqlBaseType "boolean"
 instance IsSqlType PGDate where
-  showSqlType _ = "date"
+  showSqlType _ = SqlType.SqlBaseType "date"
 instance IsSqlType PGFloat4 where
-  showSqlType _ = "real"
+  showSqlType _ = SqlType.SqlBaseType "real"
 instance IsSqlType PGFloat8 where
-  showSqlType _ = "double precision"
+  showSqlType _ = SqlType.SqlBaseType "float8"
 instance IsSqlType PGInt8 where
-  showSqlType _ = "bigint"
+  showSqlType _ = SqlType.SqlBaseType "bigint"
 instance IsSqlType PGInt4 where
-  showSqlType _ = "integer"
+  showSqlType _ = SqlType.SqlBaseType "int4"
 instance IsSqlType PGInt2 where
-  showSqlType _ = "smallint"
+  showSqlType _ = SqlType.SqlBaseType "smallint"
 instance IsSqlType PGNumeric where
-  showSqlType _ = "numeric"
+  showSqlType _ = SqlType.SqlBaseType "numeric"
 instance IsSqlType PGText where
-  showSqlType _ = "text"
+  showSqlType _ = SqlType.SqlBaseType "text"
 instance IsSqlType PGTime where
-  showSqlType _ = "time"
+  showSqlType _ = SqlType.SqlBaseType "time"
 instance IsSqlType PGTimestamp where
-  showSqlType _ = "timestamp"
+  showSqlType _ = SqlType.SqlBaseType "timestamp"
 instance IsSqlType PGTimestamptz where
-  showSqlType _ = "timestamp with time zone"
+  showSqlType _ = SqlType.SqlBaseType "timestamptz"
 instance IsSqlType PGUuid where
-  showSqlType _ = "uuid"
+  showSqlType _ = SqlType.SqlBaseType "uuid"
 instance IsSqlType PGCitext where
-  showSqlType _ =  "citext"
+  showSqlType _ = SqlType.SqlBaseType "citext"
 instance IsSqlType PGBytea where
-  showSqlType _ = "bytea"
+  showSqlType _ = SqlType.SqlBaseType "bytea"
 instance IsSqlType a => IsSqlType (PGArray a) where
-  showSqlType _ = showSqlType ([] :: [a]) ++ "[]"
+  showSqlType _ = SqlType.SqlArray (showSqlType ([] :: [a]))
 instance IsSqlType a => IsSqlType (C.Nullable a) where
   showSqlType _ = showSqlType ([] :: [a])
 instance IsSqlType PGJson where
-  showSqlType _ = "json"
+  showSqlType _ = SqlType.SqlBaseType "json"
 instance IsSqlType PGJsonb where
-  showSqlType _ = "jsonb"
+  showSqlType _ = SqlType.SqlBaseType "jsonb"
 instance IsRangeType a => IsSqlType (PGRange a) where
   showSqlType _ = showRangeType ([] :: [a])
 
 class IsSqlType pgType => IsRangeType pgType where
-  showRangeType :: proxy pgType -> String
+  showRangeType :: proxy pgType -> SqlType.SqlType
 
 instance IsRangeType PGInt4 where
-  showRangeType _ = "int4range"
+  showRangeType _ = SqlType.SqlBaseType "int4range"
 
 instance IsRangeType PGInt8 where
-  showRangeType _ = "int8range"
+  showRangeType _ = SqlType.SqlBaseType "int8range"
 
 instance IsRangeType PGNumeric where
-  showRangeType _ = "numrange"
+  showRangeType _ = SqlType.SqlBaseType "numrange"
 
 instance IsRangeType PGTimestamp where
-  showRangeType _ = "tsrange"
+  showRangeType _ = SqlType.SqlBaseType "tsrange"
 
 instance IsRangeType PGTimestamptz where
-  showRangeType _ = "tstzrange"
+  showRangeType _ = SqlType.SqlBaseType "tstzrange"
 
 instance IsRangeType PGDate where
-  showRangeType _ = "daterange"
+  showRangeType _ = SqlType.SqlBaseType "daterange"
 
 -- * SQL datatypes
 

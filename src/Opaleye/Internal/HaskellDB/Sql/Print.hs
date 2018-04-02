@@ -122,12 +122,13 @@ ppTable st = case sqlTableSchemaName st of
 
 data InclusiveExclusive = Inclusive' | Exclusive'
 
-ppRange :: String -> SqlRangeBound -> SqlRangeBound -> Doc
+ppRange :: SqlType.SqlType -> SqlRangeBound -> SqlRangeBound -> Doc
 ppRange t start end =
-  ppSqlExpr (FunSqlExpr t [ startValue
-                          , endValue
-                          , ConstSqlExpr boundTypeSymbol
-                          ])
+  ppSqlExpr (FunSqlExpr (ppSqlType t)
+                        [ startValue
+                        , endValue
+                        , ConstSqlExpr boundTypeSymbol
+                        ])
 
   where value_boundTypeT = \case
           Inclusive a -> (Inclusive', a)
